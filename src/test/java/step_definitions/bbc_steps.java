@@ -23,7 +23,7 @@ public class bbc_steps {
     public static WebDriver driver;
     public static WebDriverWait wait;
 
-
+// this before statement is called for each feature file and initialises the chromedriver with a timeout of 30 seconds to load and execute actions
     @Before(value = "@bbc_before", order = 0)
     public void bbc_before(Scenario scenario) {
         //Boolean isHeadless = configFileReader.getHeadless();
@@ -34,15 +34,16 @@ public class bbc_steps {
         driver.manage().timeouts().implicitlyWait(30, SECONDS);
         wait = new WebDriverWait(driver, 30);
     }
-
+// teardown, quit chromedriver
     @After(value = "@bbc_after", order = 0)
     public void bbc_after(Scenario scenario) {
         driver.quit();
     }
 
+    // get the signin page, maximise display and signin. github secrets should really be used for sensitive details
     @Given("I am on the bbc login page")
     public void i_am_on_the_bbc_login_page() {
-        driver.get("https://www.bbc.co.uk/");
+        driver.get("https://account.bbc.com/signin");
         driver.manage().window().maximize();
         try {
             wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.xpath("/html/body/div/div/div/div[1]/div/header/nav/div[1]/div/div[2]/ul[1]/li[1]/a/span[2]")))).click();
@@ -53,11 +54,12 @@ public class bbc_steps {
         }
     }
 
+    //
     @When("I press the Sign in button")
     public void i_press_the_sign_in_button() {
         driver.findElement(By.id("submit-button")).click();
     }
-
+// simple assert (junit) to verify on correct next page
     @Then("I can successfully log into the bbc site")
     public void i_can_successfully_log_into_the_bbc_site() throws InterruptedException {
         WebElement welcomeToTheBBC = driver.findElement(By.xpath("//*[@id=\"header-content\"]/div[2]/div/div/div/div"));
