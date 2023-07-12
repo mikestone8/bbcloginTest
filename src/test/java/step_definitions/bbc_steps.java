@@ -46,7 +46,6 @@ public class bbc_steps {
         driver.get("https://account.bbc.com/signin");
         driver.manage().window().maximize();
         try {
-            wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.xpath("/html/body/div/div/div/div[1]/div/header/nav/div[1]/div/div[2]/ul[1]/li[1]/a/span[2]")))).click();
             wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("user-identifier-input")))).sendKeys("mikestoneham43@gmail.com");
             driver.findElement(By.id("password-input")).sendKeys("12157FGREDS");
         } catch (Exception e) {
