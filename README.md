@@ -1,2 +1,2 @@
 # bbcloginTest
-Just a test!
+# hopefully simple and gets the message across nicely!
