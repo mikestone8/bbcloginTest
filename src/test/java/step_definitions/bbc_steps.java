@@ -1,5 +1,8 @@
 package step_definitions;
 
+import framework.pages.bbcLandingPage;
+import framework.pages.bbcSettings;
+import framework.pages.bbcSignIn;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -7,9 +10,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -26,14 +27,13 @@ public class bbc_steps {
 // this before statement is called for each feature file and initialises the chromedriver with a timeout of 30 seconds to load and execute actions
     @Before(value = "@bbc_before", order = 0)
     public void bbc_before(Scenario scenario) {
-        //Boolean isHeadless = configFileReader.getHeadless();
         ChromeOptions options = new ChromeOptions();
-        //options.setHeadless(isHeadless);
         driver = new ChromeDriver(options);
         this.scenario = scenario;
         driver.manage().timeouts().implicitlyWait(30, SECONDS);
         wait = new WebDriverWait(driver, 30);
     }
+
 // teardown, quit chromedriver
     @After(value = "@bbc_after", order = 0)
     public void bbc_after(Scenario scenario) {
@@ -46,24 +46,40 @@ public class bbc_steps {
         driver.get("https://account.bbc.com/signin");
         driver.manage().window().maximize();
         try {
-            wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("user-identifier-input")))).sendKeys("mikestoneham43@gmail.com");
-            driver.findElement(By.id("password-input")).sendKeys("12157FGREDS");
+            wait.until(ExpectedConditions.visibilityOf(bbcSignIn.emailInput(driver))).sendKeys("mikestoneham43@gmail.com");
+            bbcSignIn.passwordInput(driver).sendKeys("12157FGREDS");
         } catch (Exception e) {
-            System.out.println("No login");
+            System.out.println("No login found");
         }
     }
 
     //
     @When("I press the Sign in button")
     public void i_press_the_sign_in_button() {
-        driver.findElement(By.id("submit-button")).click();
+        bbcSignIn.buttonSubmit(driver).click();
     }
+
 // simple assert (junit) to verify on correct next page
     @Then("I can successfully log into the bbc site")
     public void i_can_successfully_log_into_the_bbc_site() throws InterruptedException {
-        WebElement welcomeToTheBBC = driver.findElement(By.xpath("//*[@id=\"header-content\"]/div[2]/div/div/div/div"));
+        WebElement welcomeToTheBBC = bbcLandingPage.landingPageTitle(driver);
         Assert.assertTrue(welcomeToTheBBC.isDisplayed());
     }
 
+    @Then("I can access my accounts setting to change the postcode set")
+    public void i_can_access_my_accounts_setting_to_change_the_postcode_set() throws InterruptedException {
+        bbcLandingPage.yourAccount(driver).click();
+        wait.until(ExpectedConditions.visibilityOf(bbcLandingPage.settings(driver))).click();
+        wait.until(ExpectedConditions.visibilityOf(bbcSettings.settingsPostcode(driver)));
+        WebElement postcodeField = bbcSettings.settingsPostcode(driver);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", postcodeField, 5);
+        postcodeField.click();
+        wait.until(ExpectedConditions.visibilityOf(bbcSettings.postCodeInput(driver))).click();
+        bbcSettings.postCodeInput(driver).sendKeys(Keys.CONTROL + "a");
+        bbcSettings.updatePostcode();
+        bbcSettings.saveAndContinue(driver).click();
+        String newPC = wait.until(ExpectedConditions.visibilityOf(bbcSettings.newPostcode(driver))).getText();
+        Assert.assertEquals(newPC, "RG265AJ");
+    }
 
 }
